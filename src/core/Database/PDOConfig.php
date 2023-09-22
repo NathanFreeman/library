@@ -71,7 +71,7 @@ class PDOConfig
 
     public function hasUnixSocket(): bool
     {
-        return isset($this->unixSocket);
+        return !empty($this->unixSocket);
     }
 
     public function getUnixSocket(): string
