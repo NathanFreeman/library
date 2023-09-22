@@ -35,6 +35,7 @@ class ConnectionPool
     public function __construct(callable $constructor, int $size = self::DEFAULT_SIZE, ?string $proxy = null)
     {
         $this->pool = new Channel($this->size = $size);
+        var_dump($this->pool->capacity);
         $this->constructor = $constructor;
         $this->num = 0;
         $this->proxy = $proxy;
