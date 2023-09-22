@@ -64,6 +64,7 @@ class PDOProxy extends ObjectProxy
     {
         $constructor = $this->constructor;
         parent::__construct($constructor());
+        $this->__object->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->round++;
         /* restore context */
         if ($this->setAttributeContext) {
