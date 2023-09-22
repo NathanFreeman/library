@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Swoole\Database;
 
+use PDO;
 use PHPUnit\Framework\TestCase;
 use Swoole\Coroutine;
 use Swoole\Tests\HookFlagsTrait;
@@ -47,7 +48,7 @@ class PDOPoolTest extends TestCase
                     try {
                         $statement = $pdo->prepare('SELECT :n as n');
                         $statement->execute([':n' => $n]);
-                        $row = $statement->fetch(\PDO::FETCH_ASSOC);
+                        $row = $statement->fetch(PDO::FETCH_ASSOC);
                         // simulate error happens
                         $statement = $pdo->prepare('KILL CONNECTION_ID()');
                         $statement->execute();
@@ -58,6 +59,49 @@ class PDOPoolTest extends TestCase
                     $pool->put(null);
 
                     $actual[] = $row['n'];
+                });
+            }
+        });
+        sort($actual);
+        $this->assertEquals($expect, $actual);
+        self::restoreHookFlags();
+    }
+
+    public function testPostgresPool()
+    {
+        self::saveHookFlags();
+        self::setHookFlags(SWOOLE_HOOK_ALL);
+        $expect = ['0', '1', '2', '3', '4'];
+        $actual = [];
+        Coroutine\run(function () use (&$actual) {
+            $config = (new PDOConfig())
+                ->withHost('pgsql')
+                ->withHost(PGSQL_SERVER_HOST)
+                ->withPort(PGSQL_SERVER_PORT)
+                ->withDbName(PGSQL_SERVER_DB)
+                ->withUsername(PGSQL_SERVER_USER)
+                ->withPassword(PGSQL_SERVER_PWD);
+            $pool = new PDOPool($config, 2);
+
+            $pdo = $pool->get();
+            $pdo->query(
+                <<<EOF
+CREATE TABLE test (
+    id INTEGER
+);
+EOF
+            );
+
+            for ($n = 5; $n--;) {
+                Coroutine::create(function () use ($pool, $n, &$actual) {
+                    $pdo = $pool->get();
+                    $statement = $pdo->prepare('INSERT INTO test values(?, ?)');
+                    $statement->execute([$n]);
+                    $statement = $pdo->prepare('SELECT id FROM test where id = ?');
+                    $statement->execute([$n]);
+                    $row = $statement->fetch(PDO::FETCH_ASSOC);
+                    $actual[] = $row['id'];
+                    $pool->put($pdo);
                 });
             }
         });

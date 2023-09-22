@@ -21,6 +21,8 @@ services:
     image: swoole-library
     links:
       - mysql
+      - pgsql
+      - oracle
       - redis
       - wordpress
       - nacos
@@ -67,6 +69,22 @@ services:
       MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: password
 
+  pgsql:
+    container_name: swoole-library-pgsql
+    image: postgres:14
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: root
+
+  oracle:
+    container_name: swoole-library-oracle
+    image: gvenzl/oracle-xe:slim
+    environment:
+      ORACLE_PASSWORD: oracle
+    ports:
+      - "1521:1521"
+
   redis:
     container_name: swoole-library-redis
     image: redis:5.0
@@ -82,7 +100,7 @@ services:
 
   consul:
     container_name: swoole-library-consul
-    image: consul
+    image: consul:latest
     command:
       consul agent -dev -client=0.0.0.0
     ports:
