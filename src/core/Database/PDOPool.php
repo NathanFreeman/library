@@ -53,7 +53,7 @@ class PDOPool extends ConnectionPool
                 if ($this->config->hasUnixSocket()) {
                     $dsn = "mysql:unix_socket={$this->config->getUnixSocket()};dbname={$this->config->getDbname()};charset={$this->config->getCharset()}";
                 } else {
-                    $dsn = "mysql:host={$this->config->getUnixSocket()};port={$this->config->getPort()};dbname={$this->config->getDbname()};charset={$this->config->getCharset()}";
+                    $dsn = "mysql:host={$this->config->getHost()};port={$this->config->getPort()};dbname={$this->config->getDbname()};charset={$this->config->getCharset()}";
                 }
                 break;
             case 'pgsql':
