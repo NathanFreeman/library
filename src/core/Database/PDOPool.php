@@ -66,7 +66,7 @@ class PDOPool extends ConnectionPool
                 $dsn = 'sqlite:'.$this->config->getDbname();
                 break;
             default:
-                throw new Exception('Unknown Database Driver');
+                throw new Exception('Unsupported Database Driver:'.$driver);
         }
 
         return $dsn;

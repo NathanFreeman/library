@@ -16,12 +16,6 @@ use PDOException;
 
 class PDOProxy extends ObjectProxy
 {
-    public const IO_ERRORS = [
-        2002, // MYSQLND_CR_CONNECTION_ERROR
-        2006, // MYSQLND_CR_SERVER_GONE_ERROR
-        2013, // MYSQLND_CR_SERVER_LOST
-    ];
-
     /** @var PDO */
     protected $__object;
 
