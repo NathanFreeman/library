@@ -16,7 +16,6 @@ use PDO;
 use Swoole\ConnectionPool;
 
 /**
- * @method PDO|PDOProxy get()
  * @method void put(PDO|PDOProxy $connection)
  */
 class PDOPool extends ConnectionPool
@@ -38,6 +37,14 @@ class PDOPool extends ConnectionPool
 
             return new PDO($this->createDSN($driver), $this->config->getUsername(), $this->config->getPassword(), $this->config->getOptions());
         }, $size, PDOProxy::class);
+    }
+
+    public function get(float $timeout = -1)
+    {
+        $pdo = parent::get($timeout);
+        /** @var \Swoole\Database\PDOProxy $pdo */
+        $pdo->reset();
+        return $pdo;
     }
 
     /**

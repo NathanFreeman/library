@@ -52,9 +52,7 @@ class PDOStatementProxy extends ObjectProxy
         try {
             $ret = $this->__object->{$name}(...$arguments);
         } catch (PDOException $e) {
-            var_dump(DetectsLostConnections::causedByLostConnection($e), $e->getMessage());
             if (!$this->parent->inTransaction() && DetectsLostConnections::causedByLostConnection($e)) {
-                echo 789;
                 if ($this->parent->getRound() === $this->parentRound) {
                     /* if not equal, parent has reconnected */
                     $this->parent->reconnect();

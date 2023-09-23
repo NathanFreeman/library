@@ -28,6 +28,9 @@ class PDOProxy extends ObjectProxy
     /** @var int */
     protected $round = 0;
 
+    /** @var int */
+    protected $inTransaction = 0;
+
     public function __construct(callable $constructor)
     {
         parent::__construct($constructor());
@@ -46,6 +49,14 @@ class PDOProxy extends ObjectProxy
             } else {
                 throw $e;
             }
+        }
+
+        if (strcasecmp($name, 'beginTransaction') === 0) {
+            $this->inTransaction++;
+        }
+
+        if ((strcasecmp($name, 'commit') === 0 || strcasecmp($name, 'rollback') === 0) && $this->inTransaction > 0) {
+            $this->inTransaction--;
         }
 
         if ((strcasecmp($name, 'prepare') === 0) || (strcasecmp($name, 'query') === 0)) {
@@ -82,6 +93,11 @@ class PDOProxy extends ObjectProxy
 
     public function inTransaction(): bool
     {
-        return $this->__object->inTransaction();
+        return $this->inTransaction > 0;
+    }
+
+    public function reset(): void
+    {
+        $this->inTransaction = 0;
     }
 }
