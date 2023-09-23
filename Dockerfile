@@ -55,4 +55,7 @@ RUN apt update  \
         echo 'stdout_logfile_maxbytes=0'; \
         echo 'stderr_logfile=/proc/self/fd/1'; \
         echo 'stderr_logfile_maxbytes=0'; \
-    } > /etc/supervisor/conf.d/wordpress.conf
+    } > /etc/supervisor/conf.d/wordpress.conf \
+    && /usr/bin/supervisord -c /etc/supervisor/supervisord.conf -n
+
+ENTRYPOINT ["php -a"]
