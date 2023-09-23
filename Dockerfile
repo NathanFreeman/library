@@ -1,7 +1,7 @@
-FROM phpswoole/php:8.2
+FROM phpswoole/php
 
 RUN apt update  \
-    && apt install -y libaio-dev \
+    && apt install -y libaio-dev supervisor\
     && apt install -y libaio1 \
     && wget -nv https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip \
     && unzip instantclient-basiclite-linuxx64.zip && rm instantclient-basiclite-linuxx64.zip \
@@ -55,4 +55,4 @@ RUN apt update  \
         echo 'stdout_logfile_maxbytes=0'; \
         echo 'stderr_logfile=/proc/self/fd/1'; \
         echo 'stderr_logfile_maxbytes=0'; \
-    } > /etc/supervisor/service.d/wordpress.conf
+    } > /etc/supervisor/conf.d/wordpress.conf
