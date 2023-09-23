@@ -15,8 +15,8 @@ use PDO;
 use PHPUnit\Framework\TestCase;
 use Swoole\Coroutine;
 use Swoole\Coroutine\WaitGroup;
-use Swoole\Runtime;
 use Swoole\Tests\HookFlagsTrait;
+
 use function Swoole\Coroutine\go;
 use function Swoole\Coroutine\run;
 
@@ -83,22 +83,21 @@ class PDOPoolTest extends TestCase
                 ->withDbName(PGSQL_SERVER_DB)
                 ->withUsername(PGSQL_SERVER_USER)
                 ->withPassword(PGSQL_SERVER_PWD);
-            $pool   = new PDOPool($config, 3);
+            $pool = new PDOPool($config, 3);
 
             $pdo = $pool->get();
             $pdo->exec(
-                <<<EOF
+                <<<'EOF'
 create table test(id int);  
 EOF
             );
             $pool->put($pdo);
 
-
             $waitGroup = new WaitGroup();
             for ($i = 0; $i < 30; $i++) {
                 go(function () use ($pool, $i, $waitGroup) {
                     $waitGroup->add();
-                    $pdo       = $pool->get();
+                    $pdo = $pool->get();
                     $statement = $pdo->prepare('INSERT INTO test VALUES(?)');
                     $statement->execute([$i]);
 
@@ -129,12 +128,12 @@ EOF
                 ->withCharset('AL32UTF8')
                 ->withUsername(ORACLE_SERVER_USER)
                 ->withPassword(ORACLE_SERVER_PWD);
-            $pool   = new PDOPool($config, 10);
+            $pool = new PDOPool($config, 10);
 
             $pdo = $pool->get();
             $pdo->exec('DROP TABLE test');
             $pdo->exec(
-                <<<EOF
+                <<<'EOF'
 create table test(id INTEGER)  
 EOF
             );
@@ -144,7 +143,7 @@ EOF
             for ($i = 0; $i < 20; $i++) {
                 go(function () use ($pool, $i, $waitGroup) {
                     $waitGroup->add();
-                    $pdo       = $pool->get();
+                    $pdo = $pool->get();
                     $statement = $pdo->prepare('INSERT INTO test VALUES(?)');
                     $statement->execute([$i]);
 
@@ -170,22 +169,21 @@ EOF
             $config = (new PDOConfig())
                 ->withDriver('sqlite')
                 ->withHost('sqlite::memory:');
-            $pool   = new PDOPool($config, 3);
+            $pool = new PDOPool($config, 3);
 
             $pdo = $pool->get();
             $pdo->exec(
-                <<<EOF
+                <<<'EOF'
 create table test(id int);  
 EOF
             );
             $pool->put($pdo);
 
-
             $waitGroup = new WaitGroup();
             for ($i = 0; $i < 30; $i++) {
                 go(function () use ($pool, $i, $waitGroup) {
                     $waitGroup->add();
-                    $pdo       = $pool->get();
+                    $pdo = $pool->get();
                     $statement = $pdo->prepare('INSERT INTO test VALUES(?)');
                     $statement->execute([$i]);
 
@@ -203,4 +201,3 @@ EOF
         });
     }
 }
-

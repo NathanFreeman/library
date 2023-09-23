@@ -42,15 +42,13 @@ class PDOPool extends ConnectionPool
     public function get(float $timeout = -1)
     {
         $pdo = parent::get($timeout);
-        /** @var \Swoole\Database\PDOProxy $pdo */
+        /* @var \Swoole\Database\PDOProxy $pdo */
         $pdo->reset();
         return $pdo;
     }
 
     /**
      * @purpose create DSN
-     * @param string $driver
-     * @return string
      * @throws Exception
      */
     private function createDSN(string $driver): string
@@ -67,13 +65,13 @@ class PDOPool extends ConnectionPool
                 $dsn = 'pgsql:host=' . ($this->config->hasUnixSocket() ? $this->config->getUnixSocket() : $this->config->getHost()) . ";port={$this->config->getPort()};dbname={$this->config->getDbname()};";
                 break;
             case 'oci':
-                $dsn = 'oci:dbname='.($this->config->hasUnixSocket() ? $this->config->getUnixSocket() : $this->config->getHost()).':'.$this->config->getPort().'/'.$this->config->getDbname().';charset='.$this->config->getCharset();
+                $dsn = 'oci:dbname=' . ($this->config->hasUnixSocket() ? $this->config->getUnixSocket() : $this->config->getHost()) . ':' . $this->config->getPort() . '/' . $this->config->getDbname() . ';charset=' . $this->config->getCharset();
                 break;
             case 'sqlite':
-                $dsn = 'sqlite:'.$this->config->getDbname();
+                $dsn = 'sqlite:' . $this->config->getDbname();
                 break;
             default:
-                throw new Exception('Unsupported Database Driver:'.$driver);
+                throw new Exception('Unsupported Database Driver:' . $driver);
         }
 
         return $dsn;
