@@ -41,9 +41,8 @@ RUN apt update  \
     && make -j$(cat /proc/cpuinfo | grep processor | wc -l) \
     && make install \
     && docker-php-ext-enable swoole \
-    && php -m
-
-RUN echo "swoole.enable_library=off" >> /usr/local/etc/php/conf.d/docker-php-ext-swoole.ini && \
+    && php -m \
+    && echo "swoole.enable_library=off" >> /usr/local/etc/php/conf.d/docker-php-ext-swoole.ini && \
     { \
         echo '[supervisord]'; \
         echo 'user = root'; \
