@@ -13,8 +13,6 @@ RUN apt update  \
     && mv ./instantclient /usr/local/ \
     && echo '/usr/local/instantclient' > /etc/ld.so.conf.d/oracle-instantclient.conf \
     && ldconfig \
-    && ls -al /usr/local/instantclient \
-    && export ORACLE_HOME=instantclient,/path/to/instant/client/lib \
     && apt install -y sqlite3 libsqlite3-dev libpq-dev \
     && pecl update-channels \
     && docker-php-ext-enable redis \
