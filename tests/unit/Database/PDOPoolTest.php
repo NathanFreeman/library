@@ -14,7 +14,11 @@ namespace Swoole\Database;
 use PDO;
 use PHPUnit\Framework\TestCase;
 use Swoole\Coroutine;
+use Swoole\Coroutine\WaitGroup;
+use Swoole\Runtime;
 use Swoole\Tests\HookFlagsTrait;
+use function Swoole\Coroutine\go;
+use function Swoole\Coroutine\run;
 
 /**
  * Class PDOPoolTest
@@ -67,46 +71,136 @@ class PDOPoolTest extends TestCase
         self::restoreHookFlags();
     }
 
-    public function testPostgresPool()
+    public function testPostgres(): void
     {
         self::saveHookFlags();
         self::setHookFlags(SWOOLE_HOOK_ALL);
-        $expect = ['0', '1', '2', '3', '4'];
-        $actual = [];
-        Coroutine\run(function () use (&$actual) {
+        run(function () {
             $config = (new PDOConfig())
-                ->withHost('pgsql')
-                ->withHost(PGSQL_SERVER_HOST)
+                ->withDriver('pgsql')
+                ->withHost('PGSQL_SERVER_HOST')
                 ->withPort(PGSQL_SERVER_PORT)
                 ->withDbName(PGSQL_SERVER_DB)
                 ->withUsername(PGSQL_SERVER_USER)
                 ->withPassword(PGSQL_SERVER_PWD);
-            $pool = new PDOPool($config, 2);
+            $pool   = new PDOPool($config, 3);
 
             $pdo = $pool->get();
-            $pdo->query(
+            $pdo->exec(
                 <<<EOF
-CREATE TABLE test (
-    id INTEGER
-);
+create table test(id int);  
 EOF
             );
+            $pool->put($pdo);
 
-            for ($n = 5; $n--;) {
-                Coroutine::create(function () use ($pool, $n, &$actual) {
-                    $pdo = $pool->get();
-                    $statement = $pdo->prepare('INSERT INTO test values(?, ?)');
-                    $statement->execute([$n]);
+
+            $waitGroup = new WaitGroup();
+            for ($i = 0; $i < 30; $i++) {
+                go(function () use ($pool, $i, $waitGroup) {
+                    $waitGroup->add();
+                    $pdo       = $pool->get();
+                    $statement = $pdo->prepare('INSERT INTO test VALUES(?)');
+                    $statement->execute([$i]);
+
                     $statement = $pdo->prepare('SELECT id FROM test where id = ?');
-                    $statement->execute([$n]);
-                    $row = $statement->fetch(PDO::FETCH_ASSOC);
-                    $actual[] = $row['id'];
+                    $statement->execute([$i]);
+                    $result = $statement->fetch(PDO::FETCH_ASSOC);
+                    $this->assertEquals($result['id'], $i);
                     $pool->put($pdo);
+                    $waitGroup->done();
                 });
             }
+
+            $waitGroup->wait();
+            self::restoreHookFlags();
         });
-        sort($actual);
-        $this->assertEquals($expect, $actual);
-        self::restoreHookFlags();
+    }
+
+    public function testOracle(): void
+    {
+        self::saveHookFlags();
+        self::setHookFlags(SWOOLE_HOOK_ALL);
+        run(function () {
+            $config = (new PDOConfig())
+                ->withDriver('oci')
+                ->withHost(ORACLE_SERVER_HOST)
+                ->withPort(ORACLE_SERVER_PORT)
+                ->withDbName(ORACLE_SERVER_DB)
+                ->withCharset('AL32UTF8')
+                ->withUsername(ORACLE_SERVER_USER)
+                ->withPassword(ORACLE_SERVER_PWD);
+            $pool   = new PDOPool($config, 10);
+
+            $pdo = $pool->get();
+            $pdo->exec('DROP TABLE test');
+            $pdo->exec(
+                <<<EOF
+create table test(id INTEGER)  
+EOF
+            );
+            $pool->put($pdo);
+
+            $waitGroup = new WaitGroup();
+            for ($i = 0; $i < 20; $i++) {
+                go(function () use ($pool, $i, $waitGroup) {
+                    $waitGroup->add();
+                    $pdo       = $pool->get();
+                    $statement = $pdo->prepare('INSERT INTO test VALUES(?)');
+                    $statement->execute([$i]);
+
+                    $statement = $pdo->prepare('SELECT id FROM test where id = ?');
+                    $statement->execute([$i]);
+                    $result = $statement->fetch(PDO::FETCH_ASSOC);
+                    $this->assertEquals($result['ID'], $i);
+                    $pool->put($pdo);
+                    $waitGroup->done();
+                });
+            }
+
+            $waitGroup->wait();
+            self::restoreHookFlags();
+        });
+    }
+
+    public function testSqlite(): void
+    {
+        self::saveHookFlags();
+        self::setHookFlags(SWOOLE_HOOK_ALL);
+        run(function () {
+            $config = (new PDOConfig())
+                ->withDriver('sqlite')
+                ->withHost('sqlite::memory:');
+            $pool   = new PDOPool($config, 3);
+
+            $pdo = $pool->get();
+            $pdo->exec(
+                <<<EOF
+create table test(id int);  
+EOF
+            );
+            $pool->put($pdo);
+
+
+            $waitGroup = new WaitGroup();
+            for ($i = 0; $i < 30; $i++) {
+                go(function () use ($pool, $i, $waitGroup) {
+                    $waitGroup->add();
+                    $pdo       = $pool->get();
+                    $statement = $pdo->prepare('INSERT INTO test VALUES(?)');
+                    $statement->execute([$i]);
+
+                    $statement = $pdo->prepare('SELECT id FROM test where id = ?');
+                    $statement->execute([$i]);
+                    $result = $statement->fetch(PDO::FETCH_ASSOC);
+                    $this->assertEquals($result['id'], $i);
+                    $pool->put($pdo);
+                    $waitGroup->done();
+                });
+            }
+
+            $waitGroup->wait();
+            self::restoreHookFlags();
+        });
     }
 }
+
