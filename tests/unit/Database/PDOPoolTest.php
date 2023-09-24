@@ -131,7 +131,6 @@ EOF
             $pool = new PDOPool($config, 10);
 
             $pdo = $pool->get();
-            $pdo->exec('DROP TABLE test');
             $pdo->exec(
                 <<<'EOF'
 create table test(id INTEGER)  
