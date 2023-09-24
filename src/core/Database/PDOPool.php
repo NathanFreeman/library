@@ -73,7 +73,7 @@ class PDOPool extends ConnectionPool
             default:
                 throw new Exception('Unsupported Database Driver:' . $driver);
         }
-
+        var_dump($dsn);
         return $dsn;
     }
 }

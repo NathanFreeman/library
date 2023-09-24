@@ -83,7 +83,7 @@ class PDOPoolTest extends TestCase
                 ->withDbName(PGSQL_SERVER_DB)
                 ->withUsername(PGSQL_SERVER_USER)
                 ->withPassword(PGSQL_SERVER_PWD);
-            $pool = new PDOPool($config, 3);
+            $pool = new PDOPool($config, 10);
 
             $pdo = $pool->get();
             $pdo->exec(
@@ -139,7 +139,7 @@ EOF
             $pool->put($pdo);
 
             $waitGroup = new WaitGroup();
-            for ($i = 0; $i < 20; $i++) {
+            for ($i = 0; $i < 30; $i++) {
                 go(function () use ($pool, $i, $waitGroup) {
                     $waitGroup->add();
                     $pdo = $pool->get();
@@ -168,7 +168,7 @@ EOF
             $config = (new PDOConfig())
                 ->withDriver('sqlite')
                 ->withHost('sqlite::memory:');
-            $pool = new PDOPool($config, 3);
+            $pool = new PDOPool($config, 10);
 
             $pdo = $pool->get();
             $pdo->exec(
