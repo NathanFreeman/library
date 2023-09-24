@@ -78,7 +78,7 @@ class PDOPoolTest extends TestCase
         run(function () {
             $config = (new PDOConfig())
                 ->withDriver('pgsql')
-                ->withHost('PGSQL_SERVER_HOST')
+                ->withHost(PGSQL_SERVER_HOST)
                 ->withPort(PGSQL_SERVER_PORT)
                 ->withDbName(PGSQL_SERVER_DB)
                 ->withUsername(PGSQL_SERVER_USER)
