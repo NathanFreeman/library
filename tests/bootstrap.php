@@ -41,7 +41,7 @@ if (!defined('ORACLE_SERVER_HOST')) {
     define('ORACLE_SERVER_PORT', 1521);
     define('ORACLE_SERVER_USER', 'system');
     define('ORACLE_SERVER_PWD', 'oracle');
-    define('ORACLE_SERVER_DB', 'XE');
+    define('ORACLE_SERVER_DB', 'xe');
 }
 
 if (!defined('REDIS_SERVER_HOST')) {
