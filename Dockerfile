@@ -1,8 +1,7 @@
-FROM phpswoole/php
+FROM phpswoole/swoole
 
 RUN apt update  \
-    && apt install -y libaio-dev supervisor\
-    && apt install -y libaio1 \
+    && apt install -y libaio-dev libc-ares-dev libaio1 supervisor wget git \
     && wget -nv https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip \
     && unzip instantclient-basiclite-linuxx64.zip && rm instantclient-basiclite-linuxx64.zip \
     && wget -nv https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip \
@@ -16,11 +15,6 @@ RUN apt update  \
     && export ORACLE_HOME=instantclient,/usr/local/instantclient \
     && apt install -y sqlite3 libsqlite3-dev libpq-dev \
     && pecl update-channels \
-    && docker-php-ext-enable redis \
-    && docker-php-ext-install mysqli \
-    && docker-php-ext-enable mysqli \
-    && docker-php-ext-install pdo_mysql \
-    && docker-php-ext-enable pdo_mysql \
     && docker-php-ext-install pdo_pgsql \
     && docker-php-ext-enable pdo_pgsql \
     && docker-php-ext-install pdo_oci \
@@ -42,6 +36,7 @@ RUN apt update  \
     && make install \
     && docker-php-ext-enable swoole \
     && php -m \
+    && php --ri swoole \
     && echo "swoole.enable_library=off" >> /usr/local/etc/php/conf.d/docker-php-ext-swoole.ini && \
     { \
         echo '[supervisord]'; \
@@ -55,7 +50,4 @@ RUN apt update  \
         echo 'stdout_logfile_maxbytes=0'; \
         echo 'stderr_logfile=/proc/self/fd/1'; \
         echo 'stderr_logfile_maxbytes=0'; \
-    } > /etc/supervisor/conf.d/wordpress.conf \
-    && /usr/bin/supervisord -c /etc/supervisor/supervisord.conf -n
-
-ENTRYPOINT ["php -a"]
+    } > /etc/supervisor/service.d/wordpress.conf
