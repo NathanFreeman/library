@@ -15,6 +15,8 @@ RUN apt update  \
     && export ORACLE_HOME=instantclient,/usr/local/instantclient \
     && apt install -y sqlite3 libsqlite3-dev libpq-dev \
     && pecl update-channels \
+    && docker-php-ext-install mysqli \
+    && docker-php-ext-enable mysqli \
     && docker-php-ext-install pdo_pgsql \
     && docker-php-ext-enable pdo_pgsql \
     && docker-php-ext-install pdo_oci \
