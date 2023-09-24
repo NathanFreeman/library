@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          sleep 400s
+          sleep 40s
           docker-compose exec -T app composer test
 
       - name: Stop and Remove Docker Containers
