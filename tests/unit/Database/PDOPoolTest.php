@@ -123,7 +123,6 @@ EOF
             $config = (new PDOConfig())
                 ->withDriver('oci')
                 ->withHost(ORACLE_SERVER_HOST)
-                ->withPort(ORACLE_SERVER_PORT)
                 ->withDbName(ORACLE_SERVER_DB)
                 ->withCharset('AL32UTF8')
                 ->withUsername(ORACLE_SERVER_USER)
